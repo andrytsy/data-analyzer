@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import Button from '@material-ui/core/Button'
 import withStyles from '@material-ui/core/styles/withStyles'
 import LineChart from '../chart'
-
 
 const styles = theme => ({
   submit: {
@@ -21,43 +19,6 @@ class Main extends Component {
       chartData: []
     }
   }
-
-  // getBinanceData() {
-  //   fetch('https://api.binance.com/api/v1/klines?symbol=ETHUSDT&interval=1h&startTime=1547154000000&endTime=1547236800000')
-  //   .then(response => {
-  //     if (response.status !== 200) {
-  //       console.log('Looks like there was a problem. Status Code: ' + response.status)
-  //       return
-  //     }
-
-  //     response.json().then(data => {
-  //       this.bData = data.map(this.getAverage)
-  //       console.log('Binance 1h', this.bData) 
-  //     })
-  //   })
-  // }
-
-  // getCEXData() {
-  //   return fetch('https://cex.io/api/ohlcv/hd/20190111/ETH/USD')
-  //   .then(response => {
-  //     if (response.status !== 200) {
-  //       console.log('Looks like there was a problem. Status Code: ' + response.status)  
-  //       return  
-  //     }
-
-  //     response.json().then(data => {  
-  //       let data1h = JSON.parse(data.data1h)
-  //       let result = data1h.splice(data1h.length - 24, data1h.length)
-  //       this.cData = result.map(this.getAverage)
-  //       console.log('CEX 1h', this.cData) 
-  //     })
-  //   })
-  // }
-
-  // getData() {
-  //   this.getBinanceData()
-  //   this.getCEXData()
-  // }
 
   prepareBinanceData(data) {
     return data.map(this.getAverage)
@@ -95,7 +56,6 @@ class Main extends Component {
         data.push(tick)
       }
 
-      console.log('data', data)
       this.setState({ chartData: [...this.state.chartData, data] })
       this.setState({ showChart: true })
     }))
@@ -104,8 +64,7 @@ class Main extends Component {
 
   render() {
     let chart = this.state.showChart ? 
-      <LineChart chartData={this.state.chartData} ></LineChart> :
-      ''
+      <LineChart chartData={this.state.chartData} ></LineChart> : ''
 
     return (
       <div className="App">
