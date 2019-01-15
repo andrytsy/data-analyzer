@@ -31,13 +31,14 @@ class SimpleLineChart extends Component {
     return (
       <ResponsiveContainer width="99%" height={320}>
         <LineChart data={this.chartData}>
-          <XAxis dataKey="hour" />
+          <XAxis dataKey="time" />
           <YAxis />
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} strokeDasharray="1 1" />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="bPrice" stroke="#82ca9d" />
-          <Line type="monotone" dataKey="cPrice" stroke="#8884d8" activeDot={{ r: 24 }} />
+          <Line type="monotone" dataKey="openDifference" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="oOpen" stroke="#8884d8" activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="bOpen" stroke="#3CB371" activeDot={{ r: 5 }} />
         </LineChart>
       </ResponsiveContainer>
     );

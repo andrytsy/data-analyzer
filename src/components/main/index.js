@@ -1,14 +1,6 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import withStyles from '@material-ui/core/styles/withStyles'
 import LineChart from '../chart'
-
-const styles = theme => ({
-  submit: {
-    width: '300px',
-    marginTop: theme.spacing.unit * 3,
-  },
-})
 
 class Main extends Component {
   constructor(props) {
@@ -20,44 +12,88 @@ class Main extends Component {
     }
   }
 
-  prepareBinanceData(data) {
-    return data.map(this.getAverage)
+  getBinanceData() {
+    let pair = 'BTCUSDT'
+    let interval = '1h'
+    return axios.get('https://api.binance.com/api/v1/klines?symbol=' + pair + '&interval=' + interval)
+    .then(response => this.prepareBinanceData(response.data))
   }
 
-  prepareCexData(data) {
-    let data1h = JSON.parse(data.data1h)
-    let result = data1h.splice(data1h.length - 24, data1h.length)
-    return result.map(this.getAverage)
+  prepareBinanceData(data) {
+    let result = data.splice(data.length - 200, 200)
+    return result.map(item => {
+      return {
+        timestamp: item[0],
+        open: Number(item[1]),
+        close: Number(item[4])
+      }
+    })
   }
-  
-  getAverage(arr) {
-    let data = arr.splice(2,2)
-    let max = Number(data[0])
-    let min= Number(data[1])
-    return (max + min) / 2
+
+  getOkexData() {
+    let pair = 'btc-usdt'
+    let interval = '3600'
+    return axios.get('https://www.okex.com/api/spot/v3/instruments/' + pair + '/candles?granularity=' + interval)
+    .then(response => this.prepareOkexData(response.data.reverse()))
   }
+
+  prepareOkexData(data) {
+    return data.map(item => {
+      return {
+        timestamp: new Date(item.time).getTime(),
+        open: item.open,
+        close: item.close
+      }
+    })
+  }
+
+  // getCexData() {
+  //   // axios.post('https://cex.io/api/price_stats/XRP/USD', { lastHours: 24, maxRespArrSize: 24 }),
+  //   return axios.get('https://cex.io/api/ohlcv/hd/20190114/XRP/USD')
+  //   .then(response => this.prepareCexData(response.data))
+  // }
+
+  // prepareCexData(data) {
+  //   let data1h = JSON.parse(data.data1h)
+  //   // let result = data1h.splice(data1h.length - 24, data1h.length)
+  //   return data1h.map(item => Number(item.splice(1,1)))
+  // }
 
   componentWillMount() {
     axios.all([
-      axios.get('https://api.binance.com/api/v1/klines?symbol=ETHUSDT&interval=1h&startTime=1547154000000&endTime=1547236800000'),
-      axios.get('https://cex.io/api/ohlcv/hd/20190111/ETH/USD')
+      this.getBinanceData(),
+      this.getOkexData(),
+      // this.getCexData()
     ])
-    .then(axios.spread((binance, cex) => {
+    .then(axios.spread((binance, okex, cex) => {
       let data = []
-      let bData = this.prepareBinanceData(binance.data)
-      let cData = this.prepareCexData(cex.data)
 
-      for(let i = 0; i < 24; i++) {
-        let tick = {
-          hour: i,
-          bPrice: bData[i],
-          cPrice: cData[i]
+      if (binance.length === okex.length) {
+        for (let i = 0; i < binance.length; i++) {
+          let b = binance[i]
+          let o = okex[i]
+          if (b.timestamp === o.timestamp) {
+            data.push({
+              time: new Date(b.timestamp).toLocaleString(),
+              bOpen: b.open,
+              oOpen: o.open,
+              bClose: b.close,
+              oClose: o.close,
+              openDifference: b.open - o.open,
+              closeDifference: b.close - o.close
+            })
+          } else {
+            console.error("Error! Timestamps not equals.")
+            return;
+          }
         }
-        data.push(tick)
-      }
 
-      this.setState({ chartData: [...this.state.chartData, data] })
-      this.setState({ showChart: true })
+        this.setState({ chartData: [...this.state.chartData, data] })
+        this.setState({ showChart: true })
+      } else {
+        console.error("Error! Length of array not correct.")
+        return;
+      }
     }))
     .catch(error => console.log(error))
   }
@@ -74,4 +110,4 @@ class Main extends Component {
   }
 }
 
-export default withStyles(styles)(Main)
+export default Main
