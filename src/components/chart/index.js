@@ -28,6 +28,7 @@ class SimpleLineChart extends Component {
           <Line type="monotone" dataKey="second_line" stroke="#20B2AA" />
           <Line type="monotone" dataKey="thrid_line" stroke="#F0E68C" />
           <Line type="monotone" dataKey="fourth_line" stroke="#32CD32" />
+          <Line type="monotone" dataKey="percent" stroke="red" />
         </LineChart>
       </ResponsiveContainer>
     );
